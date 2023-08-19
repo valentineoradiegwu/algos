@@ -12,6 +12,7 @@
 #include "lru.h"
 #include "countintervals.h"
 #include "parallelaccumulate.h"
+#include "staticvector.h"
 
 int main()
 {
@@ -149,4 +150,34 @@ int main()
 	{
 		PrintContainer(i);
 	}
+
+	//test push_back
+	val::utils::static_vector<std::string, 10> s_vec{};
+	s_vec.push_back(std::string{"Val"});
+	std::cout << "Size = " << s_vec.size() << ". Capacity = " << s_vec.capacity() << std::endl;
+	s_vec.push_back(std::string{ "Obi" });
+	s_vec.push_back(std::string{ "Oradiegwu" });
+
+	//Test copy ctor
+	val::utils::static_vector<std::string, 10> s_vec1{s_vec};
+	for (const auto& i : s_vec1)
+		std::cout << "s_vect1: " << i << std::endl;
+
+	//test front and back
+	std::cout << "Front = " << s_vec.front() << std::endl;
+	std::cout << "Back = " << s_vec.back() << std::endl;
+
+	//test move ctor
+	val::utils::static_vector<std::string, 10> s_vec3{ std::move(s_vec1) };
+	std::cout << "Size = " << s_vec3.size() << ". Capacity = " << s_vec.capacity() << std::endl;
+
+	//The moved vector should be empty now
+	std::cout << "s_vect1 size: " << s_vec1.size() << std::endl;
+
+	for (const auto& i : s_vec3)
+		std::cout << "s_vect3 after move ctor: " << i << std::endl;
+
+	//test emplace_back
+	s_vec3.emplace_back(10, '*');
+	std::cout << "Back after emplace_back = " << s_vec3[s_vec3.size() - 1] << std::endl;
 }
