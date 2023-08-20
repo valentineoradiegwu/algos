@@ -194,8 +194,13 @@ int main()
 	//test move assignment
 	s_vec5 = std::move(s_vec3);
 	for (const auto& i : s_vec5)
-		std::cout << "s_vect4 after move assignment: " << i << std::endl;
+		std::cout << "s_vect5 after move assignment: " << i << std::endl;
 	s_vec5.push_back(std::string{"bar"});
 	for (const auto& i : s_vec5)
-		std::cout << "s_vect4 after move push_back: " << i << std::endl;
+		std::cout << "s_vect5 after move push_back: " << i << std::endl;
+
+	//test initialiser list
+	val::utils::static_vector<std::string, 10> s_vec6{"orange", "banana", "mango"};
+	for (const auto& i : s_vec6)
+		std::cout << "s_vect6 after Initialiser list ctor: " << i << std::endl;
 }

@@ -22,6 +22,8 @@ namespace val::utils
 
 		static_vector() = default;
 		static_vector(const static_vector&);
+		static_vector(const std::initializer_list<T>&);
+
 		static_vector& operator=(const static_vector&);
 		static_vector(static_vector&&) noexcept;
 		static_vector& operator=(static_vector&&);
@@ -61,10 +63,25 @@ namespace val::utils
 	static_vector<T, CAP>::static_vector(const static_vector& rhs)
 		:size_{ rhs.size_ }
 	{
-		for (auto size = 0; size < size_; ++size)
+		for (size_t pos = 0; pos < size_; ++pos)
 		{
-			//No need for launder here as memory is uninitialised?
-			::new(&data_[size]) T{ rhs[size] };
+			//No need for launder here as memory is uninitialised
+			::new(&data_[pos]) T{ rhs[pos] };
+		}
+	}
+
+	template <typename T, size_t CAP>
+	static_vector<T, CAP>::static_vector(const std::initializer_list<T>& list)
+		:size_{ list.size() }
+	{
+		if (list.size() >= CAP)
+			throw std::bad_alloc{};
+
+		auto iter = list.begin();
+		for (size_t pos = 0; iter != list.end(); ++pos, ++iter)
+		{
+			//No need for launder here as memory is uninitialised
+			::new(&data_[pos]) T{ *iter };
 		}
 	}
 
