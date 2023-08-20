@@ -6,7 +6,7 @@
 #include <stdexcept>
 /*
 * One might ask why dont we just use a std::array? Well, a std::array default initialises all its elements unless you use
-* Aggregate initialiazation. Also, it is not possible to destruct an element in the array and construct a new one in its place.
+* Aggregate initialization. Also, it is not possible to destruct an element in the array and construct a new one in its place.
 * Finally the std::array is at full size from the off and we are unable to provide incremental growth up to capacity.
 */
 
@@ -22,7 +22,9 @@ namespace val::utils
 
 		static_vector() = default;
 		static_vector(const static_vector&);
+		static_vector& operator=(const static_vector&);
 		static_vector(static_vector&&) noexcept;
+		static_vector& operator=(static_vector&&);
 
 		size_t capacity() const { return CAP; }
 		size_t size() const { return size_; }
@@ -36,6 +38,7 @@ namespace val::utils
 
 		void pop_back();
 		void push_back(const T&);
+		void push_back(T&&);
 
 		const T& operator[](std::size_t pos) const;
 		T& operator[](std::size_t pos);
@@ -66,11 +69,70 @@ namespace val::utils
 	}
 
 	template <typename T, size_t CAP>
+	static_vector<T, CAP>& static_vector<T, CAP>::operator=(const static_vector& rhs)
+	{
+		if (this != &rhs)
+		{
+			const auto min = std::min(size_, rhs.size_);
+			size_t pos = 0;
+
+			for (; pos < min; ++pos)
+			{
+				(*this)[pos] = rhs[pos];
+			}
+
+			if (rhs.size_ > size_)
+			{
+				//We have to construct the remaining elements
+				for (; pos < rhs.size_; ++pos)
+					::new(&data_[pos]) T{ rhs[pos] };
+			}
+			else if (size_ > rhs.size_)
+			{
+				//We have to destruct the remaining
+				for (; pos < size_; ++pos)
+					std::destroy_at(std::launder(reinterpret_cast<T*>(&data_[pos])));
+			}
+			size_ = rhs.size_;
+		}
+		return *this;
+	}
+
+	template <typename T, size_t CAP>
 	static_vector<T, CAP>::static_vector(static_vector&& rhs) noexcept
 		:size_{ rhs.size_}
 	{
 		std::uninitialized_move(rhs.begin(), rhs.end(), begin());
 		rhs.size_ = 0;
+	}
+
+	template <typename T, size_t CAP>
+	static_vector<T, CAP>& static_vector<T, CAP>::operator=(static_vector&& rhs)
+	{
+		if (this != &rhs)
+		{
+			const auto min = std::min(size_, rhs.size_);
+			size_t pos = 0;
+
+			for (; pos < min; ++pos)
+			{
+				(*this)[pos] = std::move(rhs[pos]);
+			}
+
+			if (rhs.size_ > size_)
+			{
+				//We have to move construct the remaining elements
+				std::uninitialized_move(rhs.begin() + pos, rhs.end(), begin() + pos);
+			}
+			else if (size_ > rhs.size_)
+			{
+				//We have to destruct the remaining
+				for (; pos < size_; ++pos)
+					std::destroy_at(std::launder(reinterpret_cast<T*>(&data_[pos])));
+			}
+			size_ = std::exchange(rhs.size_, 0);
+		}
+		return *this;
 	}
 
 	template <typename T, size_t CAP>
@@ -119,6 +181,15 @@ namespace val::utils
 		if (size_ >= CAP)
 			throw std::bad_alloc{};
 		::new(&data_[size_]) T{ item };
+		++size_;
+	}
+
+	template <typename T, size_t CAP>
+	void static_vector<T, CAP>::push_back(T&& item)
+	{
+		if (size_ >= CAP)
+			throw std::bad_alloc{};
+		::new(&data_[size_]) T{ std::move(item) };
 		++size_;
 	}
 

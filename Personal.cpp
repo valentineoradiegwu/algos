@@ -180,4 +180,22 @@ int main()
 	//test emplace_back
 	s_vec3.emplace_back(10, '*');
 	std::cout << "Back after emplace_back = " << s_vec3[s_vec3.size() - 1] << std::endl;
+
+	//test copy asignment
+	val::utils::static_vector<std::string, 10> s_vec4{};
+	s_vec4.emplace_back("bar");
+	s_vec4 = s_vec3;
+	for (const auto& i : s_vec4)
+		std::cout << "s_vect4 after copy assignment: " << i << std::endl;
+	val::utils::static_vector<std::string, 10> s_vec5{};
+	s_vec4 = s_vec5;
+	std::cout << "s_vec4 after assignment size = " << s_vec4.size() << std::endl;
+
+	//test move assignment
+	s_vec5 = std::move(s_vec3);
+	for (const auto& i : s_vec5)
+		std::cout << "s_vect4 after move assignment: " << i << std::endl;
+	s_vec5.push_back(std::string{"bar"});
+	for (const auto& i : s_vec5)
+		std::cout << "s_vect4 after move push_back: " << i << std::endl;
 }
