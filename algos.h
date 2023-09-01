@@ -397,3 +397,14 @@ std::future<typename std::invoke_result<FUN, ARGS...>::type> spawn_task(FUN&& fu
 	t.detach();
 	return fut;
 }
+
+template <typename T, typename... PARAMS>
+void Print(const T& firstArg, const PARAMS&... otherArgs)
+{
+	std::cout << firstArg << std::endl;
+	if constexpr (sizeof...(otherArgs) > 0)
+	{
+		Print(otherArgs...);
+	}
+}
+

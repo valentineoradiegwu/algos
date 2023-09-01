@@ -203,4 +203,5 @@ int main()
 	val::utils::static_vector<std::string, 10> s_vec6{"orange", "banana", "mango"};
 	for (const auto& i : s_vec6)
 		std::cout << "s_vect6 after Initialiser list ctor: " << i << std::endl;
+	val::utils::static_vector<int, 10> s_vec7{ 1, 2, 3 };
 }
