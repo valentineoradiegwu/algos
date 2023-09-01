@@ -26,7 +26,7 @@ namespace val::utils
 
 		static_vector& operator=(const static_vector&);
 		static_vector(static_vector&&) noexcept;
-		static_vector& operator=(static_vector&&);
+		static_vector& operator=(static_vector&&) noexcept;
 
 		size_t capacity() const { return CAP; }
 		size_t size() const { return size_; }
@@ -124,7 +124,7 @@ namespace val::utils
 	}
 
 	template <typename T, size_t CAP>
-	static_vector<T, CAP>& static_vector<T, CAP>::operator=(static_vector&& rhs)
+	static_vector<T, CAP>& static_vector<T, CAP>::operator=(static_vector&& rhs) noexcept
 	{
 		if (this != &rhs)
 		{
