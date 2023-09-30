@@ -16,8 +16,16 @@ namespace val::utils
 	class spsc_overwrite
 	{
 	public:
-		void push(const T& item)
+		void push(const T& item) noexcept(std::is_nothrow_copy_constructible_v<T>)
 		{
+			static_assert(std::is_copy_constructible_v<T>, "T must be copy constructible");
+			emplace(item);
+		}
+
+		template <typename... Args>
+		void emplace(Args&&...args) noexcept(std::is_nothrow_constructible_v<T, Args&&...>)
+		{
+			static_assert(std::is_constructible_v<T, Args &&...>, "T must be constructible with Args&&...");
 			writeIdx_.fetch_add(1);
 
 			auto writeIdx = writeIdx_.load(std::memory_order_relaxed);
@@ -30,7 +38,7 @@ namespace val::utils
 				writeIdx = writeIdx_.load(std::memory_order_relaxed);
 				validity = validities_[writeIdx % CAP].load(std::memory_order_acquire);
 			}
-			::new(&data_[writeIdx % CAP]) T{ item };
+			::new(&data_[writeIdx % CAP]) T{ std::forward<Args>(args)... };
 			validities_[writeIdx % CAP].store(writeIdx, std::memory_order_release);
 		}
 
