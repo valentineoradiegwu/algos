@@ -206,9 +206,25 @@ int main()
 		std::cout << "s_vect6 after Initialiser list ctor: " << i << std::endl;
 	val::utils::static_vector<int, 10> s_vec7{ 1, 2, 3 };
 
-	val::utils::spsc_overwrite<int, 10> spsc_queue{};
-	spsc_queue.push(5);
+	val::utils::spsc_overwrite<int, 5> spsc_queue{};
 	int res{};
-	int* res_ptr = &res;
-	spsc_queue.pop(res_ptr);
+	auto outcome = spsc_queue.pop(res);
+	std::cout << "outcome of pop when empty = " << std::boolalpha << outcome << std::endl;
+	for (int i = 1; i < 8; ++i)
+		spsc_queue.push(i);
+	outcome = spsc_queue.pop(res);
+	std::cout << "Popped = " << res << ". Outcome = " << std::boolalpha << outcome << std::endl;
+
+	spsc_queue.push(8);
+	spsc_queue.push(9);
+	spsc_queue.push(10);
+
+	outcome = spsc_queue.pop(res);
+	std::cout << "Popped = " << res << ". Outcome = " << std::boolalpha << outcome << std::endl;
+
+	for (int i = 11; i < 21; ++i)
+		spsc_queue.push(i);
+
+	outcome = spsc_queue.pop(res);
+	std::cout << "Popped = " << res << ". Outcome = " << std::boolalpha << outcome << std::endl;
 }

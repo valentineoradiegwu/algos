@@ -31,7 +31,7 @@ namespace val::utils
 			validities_[writeIdx % CAP].store(writeIdx, std::memory_order_release);
 		}
 
-		bool pop(T* ptr)
+		bool pop(T& ptr)
 		{
 			auto readIdx = readIdx_.load(std::memory_order_relaxed);
 			auto expected_validity = readIdx;
@@ -42,23 +42,23 @@ namespace val::utils
 				if (expected_validity == 0)
 				{
 					//Validity for the slot is 0 so the RQ is empty. Note CAS updated expected_validity with what is in the validities slot.
-					ptr = nullptr;
 					return false;
 				}
 				//Tail is not equal to validity
 				//Advance tail but sometimes u might want to advance it by big jumps if the writer has far overtaken the reader by more than 2 times
 				const auto diff = expected_validity - readIdx;
 				if (diff > CAP)
-					readIdx_.fetch_add(expected_validity - CAP + 1); //Off by one? check later
+					readIdx_.store(expected_validity - CAP, std::memory_order_relaxed);
 				else
 					readIdx_.fetch_add(1);
 
 				readIdx = readIdx_.load(std::memory_order_relaxed);
 				expected_validity = readIdx;
 			}
-			ptr = reinterpret_cast<T*>(&data_[readIdx]);
+			ptr = *(reinterpret_cast<T*>(&data_[readIdx % CAP]));
 			validities_[readIdx % CAP].store(0, std::memory_order_release); //flag slot as available for write.
 			readIdx_.fetch_add(1);
+			return true;
 		}
 	
 	private:
