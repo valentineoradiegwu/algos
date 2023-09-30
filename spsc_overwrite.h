@@ -4,6 +4,9 @@
 #include <atomic>
 #include <type_traits>
 
+
+//The relaxed memory ordering semantics only guarantee that the operations on the same atomic type inside 
+//the same thread cannot be reordered, and this guarantee is called modification order consistency
 namespace val::utils
 {
 	template <typename T>
