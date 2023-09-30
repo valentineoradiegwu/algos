@@ -60,6 +60,27 @@ short ParityBruteForce(unsigned long input)
 	}
 	return parity;
 }
+
+short ParityBetterAverageCase(unsigned long input)
+{
+	short res = 0;
+	while (input)
+	{
+		res ^= 1;
+		input &= (input - 1);
+	}
+	return res;
+}
+
+bool isPowerOfTwo(unsigned long input)
+{
+	return input != 0 && (input & (input - 1)) == 0;
+}
+
+auto right_propagate_set_bit(unsigned long input)
+{
+	return input | (input - 1);
+}
 /*
 * Same algo as the partition in quicksort. It is not stable though.
 */
@@ -3183,7 +3204,7 @@ bool CanFormPalindrome(const std::string& input)
 	}
 	int odd_occurencies = 0;
 
-	for (const auto [aChar, freq] : count)
+	for (const auto& [aChar, freq] : count)
 	{
 		if (freq % 2 != 0)
 			++odd_occurencies;
@@ -5396,10 +5417,10 @@ std::vector<std::vector<std::string>> GetGroups(const std::vector<std::string>& 
 {
 	std::vector<std::string> group{};
 	std::vector<std::vector<std::string>> groups{};
-	int remaining = maxWidth;
+	size_t remaining = maxWidth;
 	for (const auto& aword : words)
 	{
-		int minWidth = !group.empty() + aword.size();
+		size_t minWidth = !group.empty() + aword.size();
 
 		if (minWidth > remaining)
 		{

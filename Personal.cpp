@@ -13,6 +13,7 @@
 #include "countintervals.h"
 #include "parallelaccumulate.h"
 #include "staticvector.h"
+#include "spsc_overwrite.h"
 
 int main()
 {
@@ -204,4 +205,10 @@ int main()
 	for (const auto& i : s_vec6)
 		std::cout << "s_vect6 after Initialiser list ctor: " << i << std::endl;
 	val::utils::static_vector<int, 10> s_vec7{ 1, 2, 3 };
+
+	val::utils::spsc_overwrite<int, 10> spsc_queue{};
+	spsc_queue.push(5);
+	int res{};
+	int* res_ptr = &res;
+	spsc_queue.pop(res_ptr);
 }

@@ -15,6 +15,9 @@
 size_t CountBits(unsigned int);
 size_t CountTotalBits(unsigned int);
 short ParityBruteForce(unsigned long input);
+short ParityBetterAverageCase(unsigned long input);
+bool isPowerOfTwo(unsigned long input);
+auto right_propagate_set_bit(unsigned long input);
 void EvenOdd(std::vector<int>& input);
 void EvenOdd1(std::vector<int>& input);
 int Partition(std::vector<int>& input);
