@@ -27,25 +27,27 @@ namespace val::utils
 		{
 			static_assert(std::is_constructible_v<T, Args&&...>, "T must be constructible with Args&&...");
 
-			auto writeIdx = writeIdx_.fetch_add(1) + 1; //fetch_add returns previous value so just add 1
-			auto validity = validities_[writeIdx % CAP].load(std::memory_order_acquire);
+			uint64_t writeIdx;
+			uint64_t validity;
 
-			while (validity != 0 && (writeIdx - validity != CAP))
+			do
 			{
-				writeIdx = writeIdx_.fetch_add(1) + 1; //fetch_add returns previous value so just add 1
-				validity = validities_[writeIdx % CAP].load(std::memory_order_acquire);
-			}
-			::new(&data_[writeIdx % CAP]) T{ std::forward<Args>(args)... };
-			validities_[writeIdx % CAP].store(writeIdx, std::memory_order_release);
+				++writeIdx_;
+				writeIdx = writeIdx_ % CAP;
+				validity = validities_[writeIdx].load(std::memory_order_acquire);
+			} while (validity && (writeIdx != validity % CAP));
+
+			::new(&data_[writeIdx]) T{ std::forward<Args>(args)... };
+			validities_[writeIdx].store(writeIdx_, std::memory_order_release);
 		}
 
 		bool pop(T& ptr)
 		{
-			auto readIdx = readIdx_.load(std::memory_order_relaxed);
-			auto expected_validity = readIdx;
+			auto readIdx = readIdx_ % CAP;
+			auto expected_validity = readIdx_;
 
 			//I only want to update the validity slot to claim it from being overwritten by writer if it is equal to my readIdx
-			while (!validities_[readIdx % CAP].compare_exchange_strong(expected_validity, readIdx + 1, std::memory_order_release, std::memory_order_relaxed))
+			while (!validities_[readIdx].compare_exchange_strong(expected_validity, readIdx_ + 1, std::memory_order_release, std::memory_order_relaxed))
 			{
 				if (expected_validity == 0)
 				{
@@ -54,22 +56,23 @@ namespace val::utils
 				}
 				//Tail is not equal to validity
 				//Advance tail but sometimes u might want to advance it by big jumps if the writer has far overtaken the reader by more than 2 times
-				const auto diff = expected_validity - readIdx;
+				const auto diff = expected_validity - readIdx_;
 				if (diff > CAP)
 				{
-					readIdx_.store(expected_validity - CAP, std::memory_order_relaxed);
-					readIdx = readIdx_.load(std::memory_order_relaxed);
+					readIdx_ += (expected_validity - CAP);
 				}
 				else
 				{
-					readIdx = readIdx_.fetch_add(1) + 1;
+					++readIdx_;
 				}
 
-				expected_validity = readIdx;
+				readIdx = readIdx_ % CAP;
+				expected_validity = readIdx_;
 			}
-			ptr = *(reinterpret_cast<T*>(&data_[readIdx % CAP]));
-			validities_[readIdx % CAP].store(0, std::memory_order_release); //flag slot as available for write.
-			readIdx_.fetch_add(1);
+
+			ptr = *(reinterpret_cast<T*>(&data_[readIdx]));
+			validities_[readIdx].store(0, std::memory_order_release); //flag slot as available for write.
+			++readIdx_;
 			return true;
 		}
 	
@@ -80,8 +83,8 @@ namespace val::utils
 		static constexpr size_t CACHE_LINE_SIZE = 64;
 #endif
 		//To prevent false sharing
-		alignas(CACHE_LINE_SIZE) std::atomic<uint64_t> writeIdx_ = { 0 };
-		alignas(CACHE_LINE_SIZE) std::atomic<uint64_t> readIdx_ = { 1 };
+		alignas(CACHE_LINE_SIZE) uint64_t writeIdx_ = { 0 };
+		alignas(CACHE_LINE_SIZE) uint64_t readIdx_ = { 1 };
 		std::aligned_storage_t<sizeof(T), alignof(T)> data_[CAP];
 		std::array<std::atomic<uint64_t>, CAP> validities_{};
 	};
