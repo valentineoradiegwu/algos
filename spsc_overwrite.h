@@ -25,7 +25,7 @@ namespace val::utils
 		template <typename... Args>
 		void emplace(Args&&...args) noexcept(std::is_nothrow_constructible_v<T, Args&&...>)
 		{
-			static_assert(std::is_constructible_v<T, Args &&...>, "T must be constructible with Args&&...");
+			static_assert(std::is_constructible_v<T, Args&&...>, "T must be constructible with Args&&...");
 			writeIdx_.fetch_add(1);
 
 			auto writeIdx = writeIdx_.load(std::memory_order_relaxed);
@@ -78,6 +78,7 @@ namespace val::utils
 #else
 		static constexpr size_t CACHE_LINE_SIZE = 64;
 #endif
+		//To prevent false sharing
 		alignas(CACHE_LINE_SIZE) std::atomic<uint64_t> writeIdx_ = { 0 };
 		alignas(CACHE_LINE_SIZE) std::atomic<uint64_t> readIdx_ = { 1 };
 		std::aligned_storage_t<sizeof(T), alignof(T)> data_[CAP];
