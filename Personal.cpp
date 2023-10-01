@@ -207,24 +207,23 @@ int main()
 	val::utils::static_vector<int, 10> s_vec7{ 1, 2, 3 };
 
 	val::utils::spsc_overwrite<int, 5> spsc_queue{};
-	int res{};
-	auto outcome = spsc_queue.pop(res);
-	std::cout << "outcome of pop when empty = " << std::boolalpha << outcome << std::endl;
+	auto outcome = spsc_queue.pop();
+	std::cout << "outcome of pop when empty = " << std::boolalpha << bool(outcome) << std::endl;
 	for (int i = 1; i < 8; ++i)
 		spsc_queue.push(i);
-	outcome = spsc_queue.pop(res);
-	std::cout << "Popped = " << res << ". Outcome = " << std::boolalpha << outcome << std::endl;
+	outcome = spsc_queue.pop();
+	std::cout << "Popped = " << *outcome << std::endl;
 
 	spsc_queue.push(8);
 	spsc_queue.push(9);
 	spsc_queue.push(10);
 
-	outcome = spsc_queue.pop(res);
-	std::cout << "Popped = " << res << ". Outcome = " << std::boolalpha << outcome << std::endl;
+	outcome = spsc_queue.pop();
+	std::cout << "Popped = " << *outcome << std::endl;
 
 	for (int i = 11; i < 21; ++i)
 		spsc_queue.push(i);
 
-	outcome = spsc_queue.pop(res);
-	std::cout << "Popped = " << res << ". Outcome = " << std::boolalpha << outcome << std::endl;
+	outcome = spsc_queue.pop();
+	std::cout << "Popped = " << *outcome << std::endl;
 }

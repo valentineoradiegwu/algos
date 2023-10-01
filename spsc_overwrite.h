@@ -2,6 +2,7 @@
 
 #include <new>
 #include <atomic>
+#include <optional>
 #include <type_traits>
 
 
@@ -41,7 +42,7 @@ namespace val::utils
 			validities_[writeIdx].store(writeIdx_, std::memory_order_release);
 		}
 
-		bool pop(T& ptr) noexcept
+		std::optional<T> pop() noexcept
 		{
 			auto readIdx = readIdx_ % CAP;
 			auto expected_validity = readIdx_;
@@ -52,7 +53,7 @@ namespace val::utils
 				if (expected_validity == 0)
 				{
 					//Validity for the slot is 0 so the RQ is empty. Note CAS updated expected_validity with what is in the validities slot.
-					return false;
+					return std::nullopt;
 				}
 				//Tail is not equal to validity
 				//Advance tail by 1 but sometimes u might want to advance it by big jumps if the writer has far overtaken the reader by more than 2 times
@@ -70,10 +71,10 @@ namespace val::utils
 				expected_validity = readIdx_;
 			}
 
-			ptr = *(reinterpret_cast<T*>(&data_[readIdx]));
+			auto ret = *(reinterpret_cast<T*>(&data_[readIdx]));
 			validities_[readIdx].store(0, std::memory_order_release); //flag slot as available for write.
 			++readIdx_;
-			return true;
+			return ret;
 		}
 
 	private:
