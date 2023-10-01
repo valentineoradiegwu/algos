@@ -41,7 +41,7 @@ namespace val::utils
 			validities_[writeIdx].store(writeIdx_, std::memory_order_release);
 		}
 
-		bool pop(T& ptr)
+		bool pop(T& ptr) noexcept
 		{
 			auto readIdx = readIdx_ % CAP;
 			auto expected_validity = readIdx_;
@@ -55,11 +55,11 @@ namespace val::utils
 					return false;
 				}
 				//Tail is not equal to validity
-				//Advance tail but sometimes u might want to advance it by big jumps if the writer has far overtaken the reader by more than 2 times
+				//Advance tail by 1 but sometimes u might want to advance it by big jumps if the writer has far overtaken the reader by more than 2 times
 				const auto diff = expected_validity - readIdx_;
 				if (diff > CAP)
 				{
-					readIdx_ += (expected_validity - CAP);
+					readIdx_ = expected_validity - CAP;
 				}
 				else
 				{
@@ -75,7 +75,7 @@ namespace val::utils
 			++readIdx_;
 			return true;
 		}
-	
+
 	private:
 #ifdef __cpp_lib_hardware_interference_size
 		static constexpr size_t CACHE_LINE_SIZE = std::hardware_destructive_interference_size;
