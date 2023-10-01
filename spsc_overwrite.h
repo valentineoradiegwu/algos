@@ -26,16 +26,13 @@ namespace val::utils
 		void emplace(Args&&...args) noexcept(std::is_nothrow_constructible_v<T, Args&&...>)
 		{
 			static_assert(std::is_constructible_v<T, Args&&...>, "T must be constructible with Args&&...");
-			writeIdx_.fetch_add(1);
 
-			auto writeIdx = writeIdx_.load(std::memory_order_relaxed);
+			auto writeIdx = writeIdx_.fetch_add(1) + 1; //fetch_add returns previous value so just add 1
 			auto validity = validities_[writeIdx % CAP].load(std::memory_order_acquire);
 
 			while (validity != 0 && (writeIdx - validity != CAP))
 			{
-				writeIdx_.fetch_add(1);
-
-				writeIdx = writeIdx_.load(std::memory_order_relaxed);
+				writeIdx = writeIdx_.fetch_add(1) + 1; //fetch_add returns previous value so just add 1
 				validity = validities_[writeIdx % CAP].load(std::memory_order_acquire);
 			}
 			::new(&data_[writeIdx % CAP]) T{ std::forward<Args>(args)... };
@@ -59,11 +56,15 @@ namespace val::utils
 				//Advance tail but sometimes u might want to advance it by big jumps if the writer has far overtaken the reader by more than 2 times
 				const auto diff = expected_validity - readIdx;
 				if (diff > CAP)
+				{
 					readIdx_.store(expected_validity - CAP, std::memory_order_relaxed);
+					readIdx = readIdx_.load(std::memory_order_relaxed);
+				}
 				else
-					readIdx_.fetch_add(1);
+				{
+					readIdx = readIdx_.fetch_add(1) + 1;
+				}
 
-				readIdx = readIdx_.load(std::memory_order_relaxed);
 				expected_validity = readIdx;
 			}
 			ptr = *(reinterpret_cast<T*>(&data_[readIdx % CAP]));
