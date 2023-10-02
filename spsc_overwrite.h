@@ -4,6 +4,7 @@
 #include <atomic>
 #include <optional>
 #include <type_traits>
+#include "scoped_exit.h"
 
 
 //The relaxed memory ordering semantics only guarantee that the operations on the same atomic type inside 
@@ -42,7 +43,7 @@ namespace val::utils
 			validities_[writeIdx].store(writeIdx_, std::memory_order_release);
 		}
 
-		std::optional<T> pop() noexcept
+		std::optional<T> pop() noexcept(std::is_nothrow_copy_constructible_v<T>)
 		{
 			auto readIdx = readIdx_ % CAP;
 			auto expected_validity = readIdx_;
@@ -71,9 +72,10 @@ namespace val::utils
 				expected_validity = readIdx_;
 			}
 
-			auto ret = *(reinterpret_cast<T*>(&data_[readIdx]));
-			validities_[readIdx].store(0, std::memory_order_release); //flag slot as available for write.
 			++readIdx_;
+			//flag slot as available for write after normal return or exception
+			auto update = make_scoped_action([&]() { validities_[readIdx].store(0, std::memory_order_release); });
+			std::optional<T> ret = *(reinterpret_cast<T*>(&data_[readIdx]));
 			return ret;
 		}
 
