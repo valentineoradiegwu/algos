@@ -226,4 +226,8 @@ int main()
 
 	while (outcome = spsc_queue.pop())
 		std::cout << "Popped = " << *outcome << std::endl;
+	std::cout << "Should be empty = " << std::boolalpha << spsc_queue.empty() << std::endl;
+
+	spsc_queue.push(22);
+	std::cout << "Should NOT be empty = " << std::boolalpha << spsc_queue.empty() << std::endl;
 }

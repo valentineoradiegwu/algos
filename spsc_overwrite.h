@@ -81,6 +81,11 @@ namespace val::utils
 
 		[[nodiscard]] size_t capacity() const noexcept { return CAP; }
 
+		[[nodiscard]] bool empty() const noexcept
+		{
+			return validities_[readIdx_ % CAP].load(std::memory_order_relaxed) == 0;
+		}
+
 	private:
 #ifdef __cpp_lib_hardware_interference_size
 		static constexpr size_t CACHE_LINE_SIZE = std::hardware_destructive_interference_size;
