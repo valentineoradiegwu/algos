@@ -224,6 +224,6 @@ int main()
 	for (int i = 11; i < 21; ++i)
 		spsc_queue.push(i);
 
-	outcome = spsc_queue.pop();
-	std::cout << "Popped = " << *outcome << std::endl;
+	while (outcome = spsc_queue.pop())
+		std::cout << "Popped = " << *outcome << std::endl;
 }

@@ -77,6 +77,8 @@ namespace val::utils
 			return ret;
 		}
 
+		[[nodiscard]] size_t capacity() const noexcept { return CAP; }
+
 	private:
 #ifdef __cpp_lib_hardware_interference_size
 		static constexpr size_t CACHE_LINE_SIZE = std::hardware_destructive_interference_size;
