@@ -7,6 +7,36 @@
 #include "scoped_exit.h"
 
 
+/*
+* This buffer overwrites the oldest item when it is full and the consumer cant keep up.
+* A buffer which overwrites the oldest data is hard to get right without a lock. The canonical solution
+* of such a buffer is for the writer to increment the read index upon the detection of a full buffer so that the reader
+* consumes from the oldest and the writer can overwrite. All easy with a lock of course. To create a lock free impl,
+* these are the challenges.
+* 1. The typical spsc lock free impl expects only the producer thread to update the write index and the consumer thread
+*    to update the read index. This would be violated since the producer has to update the read index when full.
+* 2. Upon incrementing the read index by the writer, the reader could load this atomic read index to a local variable,
+*    get preempted by the scheduler, and by the time it is rescheduled, it is operating with a stale read index that has been advanced by writer.
+* 3. It is almost impossible to ensure that a location overwritten by the producer is not being simultaneous read by the
+*    consumer.
+* We need an extra field to determine if a slot is valid for reading or for writing and the following uses an atomic uint64_t
+* per slot.
+* 1. The field is called validity and one exist per slot on the queue. The options were to either embed this inside the message
+*    or have a parallel array of these fields. I went for the latter for cache reasons as i want the data to be close to each other
+*    without being interspersed by the validity field.
+* 2. It starts off as 0.
+* 3. Before a writer updates a slot, validity MUST be 0 (slot is empty or has been read) or a multiple of capacity + index.
+*    For a capacity of 15, index 1 is valid if the field contains 1, 16, 31, 46 etc. This indicates the writer is overwriting the slot.
+* 4. Before a reader reads a slot, it checks if its index is equal to validity. For example if the read index is 16 (logically 1 in a
+*    15 cap queue i.e. 16%15) and the validity is 16, then the reader is reading the oldest value. The reader has to claim the slot
+*    by atomically doing a CAS and writing 16 + 1 = 17. 17 breaks the A writer validity described in (3) and avoid overwriting slot
+*    the slot and move to next one. Once reader has  finished reading, it sets validity to 0 thereby flagging the slot as available
+*    for writing in next loop around. If the readers index is not equal to the index in validity, then the slot has been overwritten
+*    and reader has to search for oldest slot. Sometimes the writer may have done a number of loops over the reader, and we have to adjust
+*    the reader accordingly to then start searching for oldest. The oldest slot is the one whose validity is equal to the index of reader.
+*/
+
+
 //The relaxed memory ordering semantics only guarantee that the operations on the same atomic type inside 
 //the same thread cannot be reordered, and this guarantee is called modification order consistency
 namespace val::utils
