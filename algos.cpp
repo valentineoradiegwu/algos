@@ -72,6 +72,21 @@ short ParityBetterAverageCase(unsigned long input)
 	return res;
 }
 
+/*
+* 1. 
+*/
+size_t CountBitsInRange(const uint64_t input, const uint64_t left, const uint64_t right)
+{
+	uint64_t mask = (uint64_t)1 << right;
+	size_t count = 0;
+	for (int i = left; i <= right; ++i)
+	{
+		count += mask & input;
+		mask <<= 1;
+	}
+	return count;
+}
+
 bool isPowerOfTwo(unsigned long input)
 {
 	return input != 0 && (input & (input - 1)) == 0;
@@ -175,14 +190,31 @@ void DutchPartition(size_t pivot_idx, std::vector<int>& input)
 	}
 }
 
+//My take on the problem and it works like a charm.
+bool CanJump(const std::vector<int>& nums)
+{
+	int current = nums.size() - 1;
+	while (current > 0)
+	{
+		int runner = current - 1;
+		while (nums[runner] < (current - runner))
+		{
+			--runner;
+			if (runner < 0) break;
+		}
+		current = runner;
+	}
+	return current == 0;
+}
+
 int maxProfit(const std::vector<int>& prices) 
 {
-	int max_so_far = 0;
-	int min = prices[0];
+	int max_so_far = 0; //I guess not doing any trade is an option in which case our worst case profit is 0
+	int best_buy = prices[0];
 	for (int i = 0; i < prices.size(); ++i)
 	{
-		min = std::min(min, prices[i]);
-		max_so_far = std::max(max_so_far, prices[i] - min);
+		max_so_far = std::max(max_so_far, prices[i] - best_buy);
+		best_buy = std::min(best_buy, prices[i]);
 	}
 	return max_so_far;
 }
@@ -1176,6 +1208,34 @@ Rect RectangleIntersection(const Rect& first, const Rect& second)
 		std::min(first.x + first.width, second.x + second.width) - std::max(first.x, second.x),
 		std::min(first.y + first.height, second.y + second.height) - std::max(first.y, second.y)
 	};
+}
+
+bool DoPointsFormARectangle(const Point& A, const Point& B, const Point& C, const Point& D)
+{
+	//We actually dont need the sqrt for our purposes
+	const auto l1 = pow(A.x - B.x, 2) + pow(A.y - B.y, 2);
+	const auto l2 = pow(A.x - C.x, 2) + pow(A.y - C.y, 2);
+	const auto l3 = pow(A.x - D.x, 2) + pow(A.y - D.y, 2);
+	const auto l4 = pow(B.x - C.x, 2) + pow(B.y - C.y, 2);
+	const auto l5 = pow(B.x - D.x, 2) + pow(B.y - D.y, 2);
+	const auto l6 = pow(C.x - D.x, 2) + pow(C.y - D.y, 2);
+	std::vector<double> lines{l1, l2, l3, l4, l5, l6};
+	std::sort(lines.begin(), lines.end());
+	//Comparison of floating points is not precise
+	return lines[0] == lines[1] && lines[2] == lines[3] && lines[4] == lines[5];
+}
+
+//If the points are integers then we can use the following
+bool DoPointsFormARectangle2(const Point& A, const Point& B, const Point& C, const Point& D)
+{
+	//We actually dont need the sqrt for our purposes
+	const int l1 = pow(A.x - B.x, 2) + pow(A.y - B.y, 2);
+	const int l2 = pow(A.x - C.x, 2) + pow(A.y - C.y, 2);
+	const int l3 = pow(A.x - D.x, 2) + pow(A.y - D.y, 2);
+	const int l4 = pow(B.x - C.x, 2) + pow(B.y - C.y, 2);
+	const int l5 = pow(B.x - D.x, 2) + pow(B.y - D.y, 2);
+	const int l6 = pow(C.x - D.x, 2) + pow(C.y - D.y, 2);
+	return (l1 ^ l2 ^ l3 ^ l4 ^ l5 ^ l6) == 0;
 }
 
 std::string nextString(const std::string& s)

@@ -14,6 +14,7 @@
 
 size_t CountBits(unsigned int);
 size_t CountTotalBits(unsigned int);
+size_t CountBitsInRange(const uint64_t input, const uint64_t left, const uint64_t right);
 short ParityBruteForce(unsigned long input);
 short ParityBetterAverageCase(unsigned long input);
 bool isPowerOfTwo(unsigned long input);
@@ -22,6 +23,7 @@ void EvenOdd(std::vector<int>& input);
 void EvenOdd1(std::vector<int>& input);
 int Partition(std::vector<int>& input);
 void DutchPartition(size_t pivot_idx, std::vector<int>& input);
+bool CanJump(const std::vector<int>& nums);
 int maxProfit(const std::vector<int>& prices);
 bool IsPalindrome(const std::string& input);
 bool isPalindrome2(const std::string& input);
@@ -74,6 +76,12 @@ struct Rect
 	int height;
 };
 Rect RectangleIntersection(const Rect& first, const Rect& second);
+struct Point
+{
+	int x;
+	int y;
+};
+bool DoPointsFormARectangle(const Point& A, const Point& B, const Point& C, const Point& D);
 std::string LookAndSay(int n);
 std::string nextString(const std::string& s);
 std::vector<std::string> GetValidIpAddress(const std::string& ip);
