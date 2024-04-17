@@ -89,7 +89,7 @@ namespace val::utils
 		struct storage_impl : base_storage_impl
 		{
 			template <typename... ARGS>
-			storage_impl(ARGS&& args)
+			storage_impl(ARGS&&... args)
 				: value_type_{std::forward<ARGS>(args)...}
 			{}
 
