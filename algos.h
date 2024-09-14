@@ -47,6 +47,7 @@ size_t mystrcmp2(const char* s1, const char* s2);
 size_t mystrcmp3(const char* s1, const char* s2);
 bool IsValidSudoku(const std::vector<std::vector<int>>& sudoku);
 void PrintMatrixSpiral(const std::vector<std::vector<int>>& matrix);
+std::vector<int> PrintMatrixSpiral2(const std::vector<std::vector<int>>& matrix);
 void TransposeMatrix(std::vector<std::vector<int>>& in);
 std::vector<std::vector<int>> MatrixProduct(const std::vector<std::vector<int>>& one, const std::vector<std::vector<int>>& two);
 void PrintMatrix(const std::vector<std::vector<int>>& in);

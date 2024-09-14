@@ -749,6 +749,50 @@ void PrintMatrixSpiral(const std::vector<std::vector<int>>& matrix)
 	}
 }
 
+void print_sub_matrix(const std::vector<std::vector<int>>& matrix, int offset, std::vector<int>& res)
+{
+	//There is a corner case for odd numbered matrix.
+	if (offset == matrix.size() - offset - 1)
+	{
+		res.push_back(matrix[offset][offset]);
+	}
+
+	for (int col = offset; col < matrix[0].size() - offset - 1; ++offset)
+	{
+		res.push_back(matrix[offset][col]);
+	}
+
+	for (int row = offset; row < matrix.size() - offset - 1; ++row)
+	{
+		res.push_back(matrix[row][matrix[0].size() - offset - 1]);
+	}
+
+	for (int col = matrix[0].size() - offset - 1; col > offset; --col)
+	{
+		res.push_back(matrix[matrix.size() - offset - 1][col]);
+	}
+
+	for (int row = matrix.size() - offset - 1; row > offset; --row)
+	{
+		res.push_back(matrix[row][offset]);
+	}
+}
+
+/*
+* If the matrix in n x n, another solution can be employed that can operate consistently on each submatrix.
+* 
+*/
+std::vector<int> PrintMatrixSpiral2(const std::vector<std::vector<int>>& matrix)
+{
+	std::vector<int> res;
+	res.reserve(matrix.size() * matrix[0].size());
+	for (int i = 0; i < std::ceil(0.5 * matrix.size()); ++i)
+	{
+		print_sub_matrix(matrix, i, res);
+	}
+	return res;
+}
+
 void TransposeMatrix(std::vector<std::vector<int>>& in)
 {
 	for (int i = 0; i < in.size(); ++i)
