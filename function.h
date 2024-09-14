@@ -30,8 +30,11 @@ namespace val::utils
 
 		function& operator=(function&& rhs)
 		{
-			auto cpy = function{std::move(rhs)};
-			std::swap(cpy.func, func);
+
+			if (this != &rhs)
+			{
+				func = std::move(rhs.func);
+			}
 			return *this;
 		}
 
