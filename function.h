@@ -30,7 +30,6 @@ namespace val::utils
 
 		function& operator=(function&& rhs)
 		{
-
 			if (this != &rhs)
 			{
 				func = std::move(rhs.func);
@@ -42,6 +41,11 @@ namespace val::utils
 		function(FUN&& fun)
 			: func{ std::make_unique<model<FUN>>(std::forward<FUN>(fun)) }
 		{}
+
+		RET operator()(PARAMS&&... ARGS)
+		{
+			return func->invoke(std::forward<PARAMS>(ARGS)...);
+		}
 	private:
 		struct callable
 		{
