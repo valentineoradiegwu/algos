@@ -120,6 +120,7 @@ std::vector<std::vector<int>> PrintLevelsBinTree2(std::shared_ptr<BinaryTree> he
 std::vector<std::vector<int>> PrintLevelsBinTree3(std::shared_ptr<BinaryTree> head);
 bool IsBalanced(const std::shared_ptr<const BinaryTree> root);
 bool IsPerfect(const std::shared_ptr<const BinaryTree> root);
+bool IsComplete(const std::shared_ptr<const BinaryTree> root);
 int Height(const std::shared_ptr<const BinaryTree> root);
 bool IsSymmetrical(const std::shared_ptr<const BinaryTree> root);
 std::shared_ptr<const BinaryTree> LowestCommonAncestor(const std::shared_ptr<const BinaryTree> root, 

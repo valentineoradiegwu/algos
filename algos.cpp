@@ -2180,6 +2180,39 @@ bool IsPerfect(const std::shared_ptr<const BinaryTree> root)
 	return IsPerfectHelper(root, 0, depth);
 }
 
+bool IsComplete(const std::shared_ptr<const BinaryTree> root)
+{
+	if (!root)
+		return true;
+	std::queue<std::shared_ptr<const BinaryTree>> q{};
+	q.push(root);
+	bool end = false;
+	while (!q.empty())
+	{
+		auto node = q.front();
+		q.pop();
+		if (node->left)
+		{
+			if (end) return false;
+			q.push(node->left);
+		}
+		else
+		{
+			end = true;
+		}
+		if (node->right)
+		{
+			if (end) return false;
+			q.push(node->right);
+		}
+		else
+		{
+			end = true;
+		}
+	}
+	return true;
+}
+
 bool checkSymetrical(const std::shared_ptr<const BinaryTree> left, const std::shared_ptr<const BinaryTree> right)
 {
 	if (!left && !right)
