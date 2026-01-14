@@ -19,7 +19,7 @@ int main()
 {
 	std::cout << "Hello World!\n";
 	std::cout << "The number of set bits in 13 is " << CountBits(13) << std::endl;
-	std::cout << "The toal number of bits in 4096 is " << CountTotalBits(4096) << std::endl;
+	std::cout << "The toal number of bits in 4096 is " << TotalBits(4096) << std::endl;
 	std::cout << "Parity for 13 is " << ParityBruteForce(13) << std::endl;
 	std::vector<int> vec1{ 5, 2, 4, 5, 7, 9, 11, 23 };
 	std::vector<int> vec2{ vec1 };

@@ -13,7 +13,8 @@
 #include "singlelinked.h"
 
 size_t CountBits(unsigned int);
-size_t CountTotalBits(unsigned int);
+size_t Count_Bits2(unsigned int input);
+size_t TotalBits(unsigned int);
 size_t CountBitsInRange(const uint64_t input, const uint64_t left, const uint64_t right);
 short ParityBruteForce(unsigned long input);
 short ParityBetterAverageCase(unsigned long input);

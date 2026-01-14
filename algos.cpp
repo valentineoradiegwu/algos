@@ -39,8 +39,21 @@ size_t CountBits(unsigned int input)
 	}
 	return count;
 }
+/*
+* More efficient since we loop by the number of times we have set bits rather than on every bit as above.
+*/
+size_t Count_Bits2(unsigned int input)
+{
+	size_t count = 0;
+	while (input)
+	{
+		input &= (input - 1);
+		++count;
+	}
+	return count;
+}
 
-size_t CountTotalBits(unsigned int input)
+size_t TotalBits(unsigned int input)
 {
 	return int(log2(input)) + 1;
 }
@@ -116,18 +129,16 @@ This solution is stable.
 */
 void EvenOdd1(std::vector<int>& input)
 {
-	int left = 0, right = input.size() - 1;
-	while (left < right)
-	{
-		while (input[left] % 2 == 0 && left < right)
-			++left;
-		while (input[right] % 2 == 1 && left < right)
-			--right;
-		if (left < right)
-		{
-			std::swap(input[left], input[right]);
-			++left;
-			--right;
+	size_t partition = 0;
+	for (size_t i = 0; i < input.size(); ++i) {
+		if ((input[i] & 1) == 0) {
+			// Rotates by shifting all elements
+			int temp = input[i];  // Save the even element
+			for (size_t j = i; j > partition; --j) {
+				input[j] = input[j - 1];  // Shift elements right
+			}
+			input[partition] = temp;  // Place even element at partition
+			++partition;
 		}
 	}
 }
