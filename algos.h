@@ -22,6 +22,7 @@ bool isPowerOfTwo(unsigned long input);
 auto right_propagate_set_bit(unsigned long input);
 void EvenOdd(std::vector<int>& input);
 void EvenOdd1(std::vector<int>& input);
+void EvenOddStable(std::vector<int>& input);
 int Partition(std::vector<int>& input);
 void DutchPartition(size_t pivot_idx, std::vector<int>& input);
 bool CanJump(const std::vector<int>& nums);

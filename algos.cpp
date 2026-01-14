@@ -143,6 +143,22 @@ void EvenOdd1(std::vector<int>& input)
 	}
 }
 
+// Stable as well
+void EvenOddStable(std::vector<int>& input) {
+	size_t partition = 0;
+	for (size_t i = 0; i < input.size(); ++i) {
+		if ((input[i] & 1) == 0) {
+			// Uses std::swap() repeatedly
+			size_t j = i;
+			while (j > partition) {
+				std::swap(input[j], input[j - 1]);  // Swapping each pair
+				--j;
+			}
+			++partition;
+		}
+	}
+}
+
 /*
 Isnt this code exactly same as partitioning via a key? or similar at least.
 */
